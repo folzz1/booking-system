@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Забронировать аудиторию</title>
+    <link rel="stylesheet" href="css/styles3.css">
+</head>
+<body>
+<div class="header">
+    <h1>Забронировать аудиторию</h1>
+    <button class="back" onclick="window.history.back()">Назад</button>
+</div>
+<div class="content">
+    <div class="datetime-container">
+        <div class="datetime-group">
+            <label for="startDate">Дата:</label>
+            <input type="date" id="startDate" class="date-picker">
+        </div>
+
+        <div class="datetime-group">
+            <label for="startTime">Время начала:</label>
+            <input type="time" id="startTime">
+        </div>
+
+        <div class="datetime-group">
+            <label for="endTime">Время окончания:</label>
+            <input type="time" id="endTime">
+        </div>
+    </div>
+
+    <button id="checkAvailability" class="book-room">Проверить доступность</button>
+
+    <div id="availableRooms" class="bookings"></div>
+</div>
+<script src="js/book-room.js"></script>
+</body>
+</html>
