@@ -27,9 +27,42 @@
             <label for="endTime">Время окончания:</label>
             <input type="time" id="endTime">
         </div>
+
+        <button id="checkAvailability" class="book-room">Найти доступные аудитории</button>
     </div>
 
-    <button id="checkAvailability" class="book-room">Проверить доступность</button>
+    <div class="filters-container">
+        <div class="filter-group">
+            <label for="buildingFilter">Здание:</label>
+            <select id="buildingFilter" class="filter-select">
+                <option value="">Все здания</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="wingFilter">Крыло:</label>
+            <select id="wingFilter" class="filter-select">
+                <option value="">Все крылья</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="floorFilter">Этаж:</label>
+            <select id="floorFilter" class="filter-select">
+                <option value="">Любой этаж</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="capacityFilter">Вместимость от:</label>
+            <input type="number" id="capacityFilter" min="1" placeholder="Любая">
+        </div>
+
+        <div class="filter-buttons">
+            <button id="applyFilters" class="filter-btn">Применить фильтры</button>
+            <button id="resetFilters" class="filter-btn reset">Сбросить фильтры</button>
+        </div>
+    </div>
 
     <div id="availableRooms" class="bookings"></div>
 </div>

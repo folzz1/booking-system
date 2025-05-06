@@ -1,9 +1,13 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.BuildingDto;
+import com.example.backend.dto.RoomDto;
 import com.example.backend.dto.RoomWithStatusDto;
+import com.example.backend.dto.WingDto;
 import com.example.backend.model.*;
 import com.example.backend.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +32,14 @@ public class BookingService {
         this.statusRepository = statusRepository;
     }
 
+    @Transactional(readOnly = true)
+    public List<RoomDto> findAvailableRooms(LocalDateTime startTime, LocalDateTime endTime) {
+        return roomRepository.findAvailableRooms(startTime, endTime).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
     public Booking createBooking(Long roomId, Long userId,
                                  LocalDateTime startTime, LocalDateTime endTime) {
         Room room = roomRepository.findById(roomId)
@@ -51,57 +63,34 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> getBookingsForUserOnDate(Long userId, LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
         return bookingRepository.findByUserIdAndStartTimeBetween(userId, startOfDay, endOfDay);
     }
 
-    public List<Room> findOnlyAvailableRooms(LocalDateTime startTime, LocalDateTime endTime) {
-        return roomRepository.findAll().stream()
-                .filter(room -> {
-                    List<Booking> bookings = bookingRepository.findConflictingBookings(
-                            room.getId(),
-                            startTime,
-                            endTime);
-
-                    return bookings.stream().noneMatch(b ->
-                            b.getStatus().getName().equals(BookingStatus.APPROVED) ||
-                                    b.getStatus().getName().equals(BookingStatus.PENDING));
-                })
+    @Transactional(readOnly = true)
+    public List<RoomDto> findOnlyAvailableRooms(LocalDateTime startTime, LocalDateTime endTime) {
+        return roomRepository.findAvailableRooms(startTime, endTime).stream()
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    private boolean isRoomActuallyAvailable(List<Booking> bookings) {
-        if (bookings.isEmpty()) {
-            return true;
-        }
-        return bookings.stream()
-                .noneMatch(b -> b.getStatus().getName().equals(BookingStatus.APPROVED));
+    private RoomDto convertToDto(Room room) {
+        return new RoomDto(
+                room.getId(),
+                room.getName(),
+                room.getType().getName(),
+                new BuildingDto(room.getBuilding().getId(), room.getBuilding().getName()),
+                room.getWing() != null ? new WingDto(room.getWing().getId(), room.getWing().getName()) : null,
+                room.getFloor(),
+                room.getCapacity(),
+                room.getArea()
+        );
     }
 
-    private String determineRoomStatus(List<Booking> bookings) {
-        if (bookings.isEmpty()) {
-            return BookingStatus.FREE;
-        }
-
-        // Проверяем есть ли одобренные брони
-        boolean hasApproved = bookings.stream()
-                .anyMatch(b -> b.getStatus().getName().equals(BookingStatus.APPROVED));
-
-        if (hasApproved) {
-            return "Занято";
-        }
-
-        // Проверяем есть ли брони в рассмотрении
-        boolean hasPending = bookings.stream()
-                .anyMatch(b -> b.getStatus().getName().equals(BookingStatus.PENDING));
-
-        return hasPending ? BookingStatus.PENDING : BookingStatus.FREE;
-    }
     private boolean isRoomAvailable(Long roomId, LocalDateTime startTime, LocalDateTime endTime) {
-        List<Booking> approvedBookings = bookingRepository.findApprovedByRoomIdAndTimeRange(
-                roomId, startTime, endTime);
-        return approvedBookings.isEmpty();
+        return bookingRepository.findApprovedByRoomIdAndTimeRange(roomId, startTime, endTime).isEmpty();
     }
 }

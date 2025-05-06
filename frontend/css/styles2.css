@@ -12,6 +12,7 @@ body {
     background-color: #4a90e2;
     color: white;
     padding: 10px 20px;
+    margin-bottom: 20px;
 }
 
 .logout {
@@ -25,54 +26,92 @@ body {
 
 .content {
     padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.date-container {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .date-picker {
-    display: block;
-    margin: 0 auto 20px;
-    padding: 10px;
+    padding: 8px;
     font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 .bookings {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
-.booking {
+.booking-item {
     background-color: white;
     border: 1px solid #ddd;
-    padding: 15px;
     border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s, color 0.3s;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.booking:hover {
-    background-color: #4a90e2;
-    color: white;
+.booking-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.room-name {
+    font-weight: bold;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.booking-time {
+    color: #7f8c8d;
+}
+
+.booking-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 14px;
+}
+
+.booking-details span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .no-bookings {
     text-align: center;
-    font-size: 18px;
-    color: #888;
+    padding: 20px;
+    color: #7f8c8d;
+    font-size: 16px;
 }
 
 .book-room {
+    display: inline-block;
     background-color: #4a90e2;
     color: white;
-    border: none;
+    text-decoration: none;
     padding: 10px 20px;
-    cursor: pointer;
     border-radius: 5px;
     text-align: center;
-    display: inline-block;
     margin-top: 20px;
-    text-decoration: none;
 }
 
 .book-room:hover {
     background-color: #357ab8;
+}
+
+.error-message {
+    color: #e74c3c;
+    text-align: center;
+    padding: 10px;
 }

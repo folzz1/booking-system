@@ -3,25 +3,23 @@ package com.example.backend.config;
 import com.example.backend.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService,
+                          PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Bean
@@ -29,31 +27,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/login.html",
-                                "/login",
-                                "/css/**",
-                                "/js/**",
-                                "/images/**",
-                                "/favicon.ico",
-                                "/api/users/register"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                "/",
-                                "/index.html",
-                                "/book-room",
-                                "/book-room.html",
-                                "/api/bookings/**"
-                        ).authenticated()
-
-                        .requestMatchers(
-                                "/api/rooms/**",
-                                "/api/room-types/**",
-                                "/api/users/**"
-                        ).hasRole("ADMIN")
-
-                        .anyRequest().denyAll()
+                        .requestMatchers("/login", "/login.html", "/api/users/register", "/css/**", "/js/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login.html")
@@ -63,18 +38,18 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .logoutSuccessUrl("/login.html?logout")
-                        .permitAll()
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login.html")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                 )
-                .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/login.html?error=forbidden")
-                );
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                        .invalidSessionUrl("/login.html")
+                        .maximumSessions(1)
+                )
+                .userDetailsService(userDetailsService);
 
         return http.build();
-    }
-
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 }

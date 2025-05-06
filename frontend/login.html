@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Авторизация</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
 <div class="login-container">
   <h1>Авторизация</h1>
-  <form action="/login" method="post">
+  <form id="loginForm">
     <div class="form-group">
       <label for="username">Логин:</label>
       <input type="text" id="username" name="username" required>
@@ -20,6 +20,36 @@
     </div>
     <button type="submit">Войти</button>
   </form>
+  <div id="error" style="color: red; margin-top: 10px;"></div>
 </div>
+
+<script>
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = new URLSearchParams();
+    formData.append('username', document.getElementById('username').value);
+    formData.append('password', document.getElementById('password').value);
+
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData,
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        window.location.href = '/';
+      } else {
+        document.getElementById('error').textContent = 'Неверный логин или пароль';
+      }
+    } catch (error) {
+      document.getElementById('error').textContent = 'Ошибка соединения';
+    }
+  });
+</script>
 </body>
 </html>
