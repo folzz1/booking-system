@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Административная панель</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+<div class="admin-container">
+    <div class="header">
+        <h1>Административная панель</h1>
+        <button id="logoutButton" class="logout">Выйти</button>
+    </div>
+
+    <div class="admin-nav">
+        <button class="admin-btn active" data-section="bookings">Бронирования</button>
+        <button class="admin-btn" data-section="buildings">Здания</button>
+        <button class="admin-btn" data-section="wings">Крылья</button>
+        <button class="admin-btn" data-section="addresses">Адреса</button>
+        <button class="admin-btn" data-section="users">Пользователи</button>
+    </div>
+
+    <div class="content">
+        <div id="bookings-section" class="admin-section active">
+            <h2>Все бронирования</h2>
+            <div class="date-container">
+                <label for="adminDatePicker">Выберите дату:</label>
+                <input type="date" id="adminDatePicker" class="date-picker">
+            </div>
+            <div id="all-bookings" class="bookings-grid"></div>
+        </div>
+
+        <div id="buildings-section" class="admin-section">
+            <h2>Здания</h2>
+            <div id="buildings-list" class="data-grid"></div>
+        </div>
+
+        <div id="wings-section" class="admin-section">
+            <h2>Крылья зданий</h2>
+            <div id="wings-list" class="data-grid"></div>
+        </div>
+
+        <div id="addresses-section" class="admin-section">
+            <h2>Адреса</h2>
+            <div id="addresses-list" class="data-grid"></div>
+        </div>
+
+        <div id="users-section" class="admin-section">
+            <h2>Пользователи</h2>
+            <div id="users-list" class="data-grid"></div>
+        </div>
+    </div>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

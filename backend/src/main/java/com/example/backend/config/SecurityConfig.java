@@ -27,13 +27,15 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/login.html", "/api/users/register", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/", "/index.html", "/login", "/login.html",
+                                "/api/users/register", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/admin/api/**", "/admin.html", "/admin","/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login.html")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/", true)
+                        .defaultSuccessUrl("/redirect-by-role", true)
                         .failureUrl("/login.html?error=true")
                         .permitAll()
                 )
@@ -44,11 +46,11 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .invalidSessionUrl("/login.html")
                         .maximumSessions(1)
-                )
-                .userDetailsService(userDetailsService);
+                        .expiredUrl("/login.html")
+                );
 
         return http.build();
     }

@@ -32,4 +32,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findConflictingBookings(@Param("roomId") Long roomId,
                                           @Param("startTime") LocalDateTime startTime,
                                           @Param("endTime") LocalDateTime endTime);
+
+    List<Booking> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT b FROM Booking b JOIN FETCH b.user JOIN FETCH b.room r LEFT JOIN FETCH r.building LEFT JOIN FETCH r.wing JOIN FETCH b.status")
+    List<Booking> findAllWithDetails();
+
+    @Query("SELECT b FROM Booking b JOIN FETCH b.user JOIN FETCH b.room r LEFT JOIN FETCH r.building LEFT JOIN FETCH r.wing JOIN FETCH b.status WHERE b.startTime BETWEEN :start AND :end")
+    List<Booking> findByStartTimeBetweenWithDetails(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

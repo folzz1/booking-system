@@ -4,9 +4,13 @@ import com.example.backend.model.User;
 import com.example.backend.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -38,5 +42,16 @@ public class UserController {
     public User getUserByUsername(@PathVariable String username) {
         return userService.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @GetMapping("/current/role")
+    @ResponseBody
+    public Map<String, String> getCurrentUserRole(Authentication authentication) {
+        String role = "USER";
+        if (authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
+            role = "ADMIN";
+        }
+        return Collections.singletonMap("role", role);
     }
 }
