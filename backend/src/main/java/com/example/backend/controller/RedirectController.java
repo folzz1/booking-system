@@ -26,7 +26,7 @@ public class RedirectController {
         if (isAdmin) {
             return "redirect:/admin";
         } else {
-            return "redirect:/index.html";
+            return "redirect:/";
         }
     }
 

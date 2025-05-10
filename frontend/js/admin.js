@@ -133,9 +133,12 @@ function displayAllBookings(bookings) {
     bookings.forEach(booking => {
         const bookingElement = document.createElement('div');
         bookingElement.className = 'booking-item';
+        bookingElement.dataset.bookingId = booking.id;
 
         const startTime = formatTime(booking.startTime);
         const endTime = formatTime(booking.endTime);
+
+        const showButtons = booking.status === 'PENDING' || booking.status === 'В рассмотрении';
 
         bookingElement.innerHTML = `
             <div class="booking-header">
@@ -149,10 +152,49 @@ function displayAllBookings(bookings) {
                 ${booking.floor !== null ? `<span><strong>Этаж:</strong> ${booking.floor}</span>` : ''}
                 <span><strong>Статус:</strong> ${getStatusText(booking.status)}</span>
             </div>
+            ${showButtons ? `
+            <div class="booking-actions">
+                <button class="approve-btn">Одобрить</button>
+                <button class="reject-btn">Отклонить</button>
+            </div>
+            ` : ''}
         `;
 
         container.appendChild(bookingElement);
     });
+
+    document.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const bookingId = this.closest('.booking-item').dataset.bookingId;
+            await updateBookingStatus(bookingId, 'approve');
+        });
+    });
+
+    document.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const bookingId = this.closest('.booking-item').dataset.bookingId;
+            await updateBookingStatus(bookingId, 'reject');
+        });
+    });
+}
+
+async function updateBookingStatus(bookingId, action) {
+    try {
+        const endpoint = `/admin/api/bookings/${bookingId}/${action}`;
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error('Ошибка при изменении статуса');
+        }
+
+        loadBookings(document.getElementById('adminDatePicker').value);
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Не удалось изменить статус: ' + error.message);
+    }
 }
 
 function getStatusText(status) {

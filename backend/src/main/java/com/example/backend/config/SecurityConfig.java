@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/login", "/login.html",
                                 "/api/users/register", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/admin/api/**", "/admin.html", "/admin","/**").hasAuthority("ADMIN")
+                        .requestMatchers("/admin/api/**", "/admin.html", "/admin","/bookings/{id}/approve","/bookings/{id}/reject").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

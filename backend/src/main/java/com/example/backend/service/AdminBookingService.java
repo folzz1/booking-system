@@ -2,7 +2,9 @@ package com.example.backend.service;
 
 import com.example.backend.dto.AdminBookingDto;
 import com.example.backend.model.Booking;
+import com.example.backend.model.BookingStatus;
 import com.example.backend.repository.BookingRepository;
+import com.example.backend.repository.BookingStatusRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +21,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class AdminBookingService {
     private final BookingRepository bookingRepository;
-
+    private final BookingStatusRepository bookingStatusRepository;
     public List<AdminBookingDto> getAllBookings() {
         return bookingRepository.findAllWithDetails().stream()
                 .map(this::convertToDto)
@@ -66,5 +68,25 @@ public class AdminBookingService {
         dto.setStatus(booking.getStatus().getName());
 
         return dto;
+    }
+
+    @Transactional
+    public void approveBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Бронирование не найдено"));
+        BookingStatus approvedStatus = bookingStatusRepository.findByName(BookingStatus.APPROVED)
+                .orElseThrow(() -> new IllegalStateException("Статус 'Одобрено' не найден в базе"));
+        booking.setStatus(approvedStatus);
+        bookingRepository.save(booking);
+    }
+
+    @Transactional
+    public void rejectBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Бронирование не найдено"));
+        BookingStatus rejectedStatus = bookingStatusRepository.findByName(BookingStatus.REJECTED)
+                .orElseThrow(() -> new IllegalStateException("Статус 'Отклонено' не найден в базе"));
+        booking.setStatus(rejectedStatus);
+        bookingRepository.save(booking);
     }
 }

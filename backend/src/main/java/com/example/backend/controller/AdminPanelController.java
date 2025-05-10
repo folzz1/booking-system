@@ -104,4 +104,26 @@ public class AdminPanelController {
                     .body("Ошибка при получении списка бронирований: " + e.getMessage());
         }
     }
+
+    @PostMapping("/bookings/{id}/approve")
+    public ResponseEntity<?> approveBooking(@PathVariable Long id) {
+        try {
+            bookingService.approveBooking(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Ошибка при одобрении бронирования: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/bookings/{id}/reject")
+    public ResponseEntity<?> rejectBooking(@PathVariable Long id) {
+        try {
+            bookingService.rejectBooking(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Ошибка при отклонении бронирования: " + e.getMessage());
+        }
+    }
 }
