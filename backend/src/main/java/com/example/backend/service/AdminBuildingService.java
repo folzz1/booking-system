@@ -19,7 +19,6 @@ public class AdminBuildingService {
 
     public List<AdminBuildingDto> getAllBuildings() {
         try {
-            // Используем упрощенный запрос без загрузки коллекций
             List<Building> buildings = buildingRepository.findAllWithAddress();
 
             return buildings.stream()
@@ -34,7 +33,6 @@ public class AdminBuildingService {
                             dto.setBuildingNumber(building.getAddress().getBuildingNumber());
                         }
 
-                        // Заменяем размеры коллекций на вызовы методов репозитория
                         dto.setWingsCount((int) buildingRepository.countWingsByBuildingId(building.getId()));
                         dto.setRoomsCount((int) buildingRepository.countRoomsByBuildingId(building.getId()));
 

@@ -14,4 +14,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 
     @Query("SELECT COUNT(b) FROM Building b WHERE b.address.id = :addressId")
     long countBuildingsByAddressId(@Param("addressId") Long addressId);
+
+    @Query("SELECT a FROM Address a LEFT JOIN FETCH a.buildings")
+    List<Address> findAllWithBuildings();
 }

@@ -30,7 +30,7 @@ public class AdminWingService {
                         dto.setBuildingName(wing.getBuilding().getName());
                     }
 
-                    dto.setRoomsCount(0);
+                    dto.setRoomsCount((int) wingRepository.countRoomsByWingId(wing.getId()));
 
                     return dto;
                 })

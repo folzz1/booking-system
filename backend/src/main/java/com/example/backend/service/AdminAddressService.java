@@ -29,9 +29,7 @@ public class AdminAddressService {
                         dto.setBuildingNumber(address.getBuildingNumber());
                         dto.setPostalCode(address.getPostalCode());
 
-                        // TODO
-                        // dto.setBuildingsCount(addressRepository.countBuildingsByAddressId(address.getId()));
-                        dto.setBuildingsCount(0);
+                        dto.setBuildingsCount((int) addressRepository.countBuildingsByAddressId(address.getId()));
 
                         return dto;
                     })
