@@ -34,7 +34,7 @@ async function checkAdminAuth() {
 }
 
 function setupEventListeners() {
-    // Навигация между разделами
+
     document.querySelectorAll('.admin-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.admin-btn').forEach(b => b.classList.remove('active'));
@@ -43,7 +43,7 @@ function setupEventListeners() {
             this.classList.add('active');
             document.getElementById(`${this.dataset.section}-section`).classList.add('active');
 
-            // Загружаем данные при переключении раздела
+
             switch(this.dataset.section) {
                 case 'bookings':
                     loadBookings(document.getElementById('adminDatePicker').value);
@@ -64,7 +64,7 @@ function setupEventListeners() {
         });
     });
 
-    // Дата для бронирований
+
     const datePicker = document.getElementById('adminDatePicker');
     const today = new Date().toISOString().split('T')[0];
     datePicker.value = today;
@@ -72,7 +72,7 @@ function setupEventListeners() {
         loadBookings(this.value);
     });
 
-    // Кнопка выхода
+
     document.getElementById('logoutButton').addEventListener('click', async function() {
         try {
             const response = await fetch('/logout', {
@@ -263,22 +263,37 @@ async function loadUsers() {
     container.innerHTML = '<div class="loading">Загрузка пользователей...</div>';
 
     try {
-        const response = await fetch('/admin/api/users', {
-            credentials: 'include'
-        });
+        const [usersResponse, rolesResponse] = await Promise.all([
+            fetch('/admin/api/users', { credentials: 'include' }),
+            fetch('/admin/api/roles', { credentials: 'include' })
+        ]);
 
-        if (!response.ok) {
-            const errorText = await response.text();
+        if (!usersResponse.ok || !rolesResponse.ok) {
+            const errorText = await usersResponse.text();
             throw new Error(errorText || 'Ошибка загрузки пользователей');
         }
 
-        const users = await response.json();
+        const users = await usersResponse.json();
+        const roles = await rolesResponse.json();
 
-        if (!users || users.length === 0) {
-            container.innerHTML = '<div class="no-data">Нет пользователей</div>';
-            return;
-        }
+        displayUsers(users, roles);
+    } catch (e) {
+        console.error('Ошибка:', e);
+        container.innerHTML = `
+            <div class="error-message">
+                ${e.message}
+                <button onclick="loadUsers()">Попробовать снова</button>
+            </div>
+        `;
+    }
+}
 
+function displayUsers(users, roles) {
+    const container = document.getElementById('users-list');
+
+    if (!users || users.length === 0) {
+        container.innerHTML = '<div class="no-data">Нет пользователей</div>';
+    } else {
         container.innerHTML = '';
         users.forEach(user => {
             if (!user) {
@@ -289,20 +304,103 @@ async function loadUsers() {
             const el = document.createElement('div');
             el.className = 'data-item';
             el.innerHTML = `
-                <p><strong>${user.firstName || ''} ${user.lastName || ''}</strong></p>
-                <p>Логин: ${user.username || 'Неизвестно'}</p>
-                <p>Роли: ${user.roles ? user.roles.join(', ') : 'Нет ролей'}</p>
-            `;
+                <p><strong>ID:</strong> ${user.id || 'Неизвестно'}</p>
+                <p><strong>ФИО:</strong> ${user.fullName || 'Неизвестно'}</p>
+                <p><strong>Роль:</strong> ${user.role || 'Неизвестно'}</p>`;
             container.appendChild(el);
         });
-    } catch (e) {
-        console.error('Ошибка:', e);
-        container.innerHTML = `
-            <div class="error-message">
-                ${e.message}
-                <button onclick="loadUsers()">Попробовать снова</button>
-            </div>
-        `;
+    }
+
+    const addUserBtn = document.createElement('button');
+    addUserBtn.className = 'add-btn';
+    addUserBtn.textContent = 'Добавить пользователя';
+    addUserBtn.addEventListener('click', () => showCreateUserModal(roles));
+    container.prepend(addUserBtn);
+}
+
+function showCreateUserModal(roles) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Создание нового пользователя</h2>
+            <form id="create-user-form">
+                <div class="form-group">
+                    <label for="username">Логин:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="firstName">Имя:</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Фамилия:</label>
+                    <input type="text" id="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Роль:</label>
+                    <select id="role" required>
+                        ${roles.map(role => `<option value="${role}">${role}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">Создать</button>
+                    <button type="button" class="cancel-btn">Отмена</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('.close-btn').addEventListener('click', () => modal.remove());
+    modal.querySelector('.cancel-btn').addEventListener('click', () => modal.remove());
+
+    modal.querySelector('#create-user-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const password = document.getElementById('password').value;
+        if (password.length < 6) {
+            alert('Пароль должен содержать минимум 6 символов');
+            return;
+        }
+
+        await createUser({
+            username: document.getElementById('username').value,
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            password: password,
+            role: document.getElementById('role').value
+        });
+        modal.remove();
+    });
+}
+
+async function createUser(userData) {
+    try {
+        const response = await fetch('/admin/api/users', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        loadUsers();
+    } catch (error) {
+        console.error('Ошибка при создании пользователя:', error);
+        alert('Ошибка при создании пользователя: ' + error.message);
     }
 }
 

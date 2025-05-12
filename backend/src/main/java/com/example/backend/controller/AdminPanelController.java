@@ -3,6 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.dto.AdminAddressDto;
 import com.example.backend.dto.AdminBuildingDto;
 import com.example.backend.dto.AdminWingDto;
+import com.example.backend.dto.CreateUserDto;
 import com.example.backend.service.AdminAddressService;
 import com.example.backend.service.AdminBookingService;
 import com.example.backend.service.AdminBuildingService;
@@ -40,6 +41,16 @@ public class AdminPanelController {
         this.bookingService = bookingService;
     }
 
+    @GetMapping("/roles")
+    public ResponseEntity<?> getAllRoles() {
+        try {
+            return ResponseEntity.ok(userService.getAllRoles());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Ошибка при получении списка ролей: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers() {
         try {
@@ -47,6 +58,17 @@ public class AdminPanelController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Ошибка при получении списка пользователей: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/users")
+    public ResponseEntity<?> createUser(@RequestBody CreateUserDto createUserDto) {
+        try {
+            userService.createUser(createUserDto);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
         }
     }
 
