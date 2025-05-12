@@ -150,3 +150,20 @@ function formatTime(dateTimeString) {
     const date = new Date(dateTimeString);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
+
+document.getElementById('bookRoomBtn').addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+        const response = await fetch('/api/users/current', {
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            window.location.href = '/book-room';
+        } else {
+            window.location.href = '/login.html';
+        }
+    } catch (error) {
+        window.location.href = '/login.html';
+    }
+});

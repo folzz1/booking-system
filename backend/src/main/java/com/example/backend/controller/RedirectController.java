@@ -1,11 +1,13 @@
 package com.example.backend.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -13,20 +15,20 @@ import java.util.Collections;
 public class RedirectController {
 
     @GetMapping("/redirect-by-role")
-    public String redirectByRole(Authentication authentication) {
+    public void redirectByRole(Authentication authentication,
+                               HttpServletResponse response) throws IOException {
         if (authentication == null) {
-            return "redirect:/login.html";
+            response.sendRedirect("/login.html");
+            return;
         }
-
-        System.out.println("User roles: " + authentication.getAuthorities());
 
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
 
         if (isAdmin) {
-            return "redirect:/admin";
+            response.sendRedirect("http://localhost:8081/admin.html");
         } else {
-            return "redirect:/";
+            response.sendRedirect("http://localhost:8081/index.html");
         }
     }
 

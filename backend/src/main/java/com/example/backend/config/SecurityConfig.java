@@ -8,6 +8,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -22,35 +25,83 @@ public class SecurityConfig {
         this.passwordEncoder = passwordEncoder;
     }
 
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(csrf -> csrf.disable())
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/", "/index.html", "/login", "/login.html",
+//                                "/api/users/register", "/css/**", "/js/**").permitAll()
+//                        .requestMatchers("/admin/api/**", "/admin.html", "/admin","/bookings/{id}/approve","/bookings/{id}/reject").hasAuthority("ADMIN")
+//                        .anyRequest().authenticated()
+//                )
+//                .formLogin(form -> form
+//                        //.loginPage("/login.html")
+//                        .loginProcessingUrl("/login")
+//                        .defaultSuccessUrl("/redirect-by-role", true)
+//                        .failureUrl("/login.html?error=true")
+//                        .permitAll()
+//                )
+//                .logout(logout -> logout
+//                        .logoutUrl("/logout")
+//                        .logoutSuccessUrl("/login.html")
+//                        .invalidateHttpSession(true)
+//                        .deleteCookies("JSESSIONID")
+//                )
+//                .sessionManagement(session -> session
+//                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+//                        .invalidSessionUrl("/login.html")
+//                        .maximumSessions(1)
+//                        .expiredUrl("/login.html")
+//                ).cors(cors -> cors.configurationSource(request -> {
+//                    CorsConfiguration config = new CorsConfiguration();
+//                    config.setAllowedOrigins(List.of("http://localhost:8081"));
+//                    config.setAllowedMethods(List.of("GET", "POST"));
+//                    return config;
+//                }));
+//
+//        return http.build();
+//    }
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/login", "/login.html",
-                                "/api/users/register", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/admin/api/**", "/admin.html", "/admin","/bookings/{id}/approve","/bookings/{id}/reject").hasAuthority("ADMIN")
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/login.html",
+                                "/book-room.html",
+                                "/admin.html",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/api/users/register"
+                        ).permitAll()
+                        .requestMatchers("/admin/api/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login.html")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/redirect-by-role", true)
+                        .defaultSuccessUrl("http://localhost:8081/redirect-by-role", true)
                         .failureUrl("/login.html?error=true")
-                        .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login.html")
+                        .logoutSuccessUrl("http://localhost:8081/login.html")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .invalidSessionUrl("/login.html")
-                        .maximumSessions(1)
-                        .expiredUrl("/login.html")
-                );
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(List.of("http://localhost:8081"));
+                    config.setAllowedMethods(List.of("*"));
+                    config.setAllowedHeaders(List.of("*"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }));
 
         return http.build();
     }
