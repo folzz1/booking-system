@@ -115,3 +115,23 @@ body {
     text-align: center;
     padding: 10px;
 }
+
+.booking-actions {
+    margin-top: 10px;
+    text-align: right;
+}
+
+.cancel-booking {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.cancel-booking:hover {
+    background-color: #c0392b;
+}
+

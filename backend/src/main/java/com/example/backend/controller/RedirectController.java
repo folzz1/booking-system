@@ -5,11 +5,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 
 @Controller
 public class RedirectController {
@@ -17,24 +15,24 @@ public class RedirectController {
     @GetMapping("/redirect-by-role")
     public void redirectByRole(Authentication authentication,
                                HttpServletResponse response) throws IOException {
-        if (authentication == null) {
-            response.sendRedirect("/login.html");
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:8081");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            response.sendRedirect("http://localhost:8081/login.html");
             return;
         }
 
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
-        if (isAdmin) {
+        if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
             response.sendRedirect("http://localhost:8081/admin.html");
-        } else {
+        }
+        else if (authorities.stream().anyMatch(a -> a.getAuthority().equals("USER"))) {
             response.sendRedirect("http://localhost:8081/index.html");
         }
-    }
-
-    @GetMapping("/current-user-roles")
-    @ResponseBody
-    public Collection<? extends GrantedAuthority> getCurrentUserRoles(Authentication authentication) {
-        return authentication != null ? authentication.getAuthorities() : Collections.emptyList();
+        else {
+            response.sendRedirect("http://localhost:8081/login.html");
+        }
     }
 }

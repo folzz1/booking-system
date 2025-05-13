@@ -99,6 +99,7 @@ async function loadBookings(date) {
 }
 
 function displayBookings(bookings) {
+    console.log("Bookings data:", bookings);
     const bookingsContainer = document.getElementById('bookings');
 
     if (bookings.length === 0) {
@@ -118,6 +119,7 @@ function displayBookings(bookings) {
 
         const startTime = formatTime(booking.startTime);
         const endTime = formatTime(booking.endTime);
+        const canCancel = canBookingBeCancelled(booking);
 
         bookingElement.innerHTML = `
             <div class="booking-header">
@@ -126,24 +128,67 @@ function displayBookings(bookings) {
             </div>
             <div class="booking-details">
                 <span>
-                    <strong>Здание:</strong> ${booking.room.building.name}
-                </span>
-                ${booking.room.wing ? `
-                    <span>
-                        <strong>Крыло:</strong> ${booking.room.wing.name}
-                    </span>
-                ` : ''}
-                <span>
-                    <strong>Этаж:</strong> ${booking.room.floor}
-                </span>
-                <span>
                     <strong>Статус:</strong> ${booking.status}
                 </span>
+            </div>
+            <div class="booking-actions">
+                ${canCancel ?
+            `<button class="cancel-booking" data-id="${booking.id}">Отменить бронирование</button>` :
+            `<button class="cancel-booking" disabled title="Нельзя отменить">Отменить бронирование</button>`
+        }
             </div>
         `;
 
         bookingsContainer.appendChild(bookingElement);
     });
+
+    setupCancelButtonsHandlers();
+}
+
+function canBookingBeCancelled(booking) {
+    console.log(`Checking booking:`, {
+        id: booking.id,
+        status: booking.status,
+        startTime: booking.startTime,
+        currentTime: new Date()
+    });
+    return true;
+    // const now = new Date();
+    // const startDate = new Date(booking.startTime);
+    // return startDate > now && booking.status === 'Одобрено';
+}
+
+function setupCancelButtonsHandlers() {
+    document.querySelectorAll('.cancel-booking:not(:disabled)').forEach(button => {
+        button.addEventListener('click', () => handleCancelBooking(button.dataset.id));
+    });
+}
+
+async function handleCancelBooking(bookingId) {
+    const isConfirmed = confirm('Вы уверены, что хотите отменить это бронирование?');
+
+    if (!isConfirmed) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/users/${bookingId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            alert('Бронирование успешно отменено');
+            const datePicker = document.getElementById('datePicker');
+            loadBookings(datePicker.value);
+        } else {
+            const error = await response.text();
+            alert(`Ошибка при отмене бронирования: ${error}`);
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при отмене бронирования');
+    }
 }
 
 function formatTime(dateTimeString) {

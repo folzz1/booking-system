@@ -93,4 +93,15 @@ public class BookingService {
     private boolean isRoomAvailable(Long roomId, LocalDateTime startTime, LocalDateTime endTime) {
         return bookingRepository.findApprovedByRoomIdAndTimeRange(roomId, startTime, endTime).isEmpty();
     }
+
+    public void cancelBooking(Long id, String username) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Бронирование не найдено"));
+
+        if (!booking.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Вы можете отменять только свои бронирования");
+        }
+
+        bookingRepository.delete(booking);
+    }
 }
