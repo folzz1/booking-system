@@ -33,14 +33,13 @@ public class SecurityConfig {
                                 "/index.html",
                                 "/login.html",
                                 "/book-room.html",
-                                "/admin.html",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
                                 "/api/users/register",
                                 "/api/users/**"
                         ).permitAll()
-                        .requestMatchers("/admin/api/**").hasAuthority("ADMIN")
+                        .requestMatchers("/admin.html","/admin/api/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
