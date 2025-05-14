@@ -1,6 +1,13 @@
 document.addEventListener('DOMContentLoaded', async function() {
+    document.body.style.overflow = 'hidden';
+
     try {
         await checkAdminAuth();
+
+        document.getElementById('initial-loader').style.display = 'none';
+        document.querySelector('.admin-container').style.display = 'block';
+        document.body.style.overflow = '';
+
         setupEventListeners();
         loadInitialData();
     } catch (error) {

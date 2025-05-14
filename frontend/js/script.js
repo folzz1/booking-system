@@ -1,6 +1,20 @@
+const PageLoader = {
+    show: () => {
+        document.getElementById('initial-loader').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    },
+    hide: () => {
+        document.getElementById('initial-loader').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+};
+
+
 document.addEventListener('DOMContentLoaded', async function() {
+    PageLoader.show();
     await checkAuth();
     setupEventListeners();
+    PageLoader.hide();
 });
 
 async function checkAuth() {
@@ -120,24 +134,38 @@ function displayBookings(bookings) {
         const startTime = formatTime(booking.startTime);
         const endTime = formatTime(booking.endTime);
         const canCancel = canBookingBeCancelled(booking);
+        const room = booking.room;
+
+        const buildingInfo = room.building ? `Здание: ${room.building.name}` : '';
+        const wingInfo = room.wing ? `Крыло: ${room.wing.name}` : '';
+        const locationInfo = [buildingInfo, wingInfo].filter(Boolean).join(', ');
+
 
         bookingElement.innerHTML = `
-            <div class="booking-header">
-                <div class="room-name">${booking.room.name} (${booking.room.type})</div>
-                <div class="booking-time">${startTime} - ${endTime}</div>
-            </div>
-            <div class="booking-details">
-                <span>
-                    <strong>Статус:</strong> ${booking.status}
-                </span>
-            </div>
-            <div class="booking-actions">
-                ${canCancel ?
+    <div class="booking-header">
+        <div class="room-name">${room.name} (${room.type})</div>
+        <div class="booking-time">${startTime} - ${endTime}</div>
+    </div>
+    <div class="booking-details">
+        <div class="detail-row">
+            <strong>Статус:</strong> ${booking.status}
+        </div>
+        ${locationInfo ? `
+        <div class="detail-row">
+            <strong>Здание:</strong> ${room.building?.name || 'Не указано'}
+            ${room.wing ? `, <strong>Крыло:</strong> ${room.wing.name}` : ''}
+        </div>` : ''}
+        ${room.floor ? `<div class="detail-row"><strong>Этаж:</strong> ${room.floor}</div>` : ''}
+        ${room.capacity ? `<div class="detail-row"><strong>Вместимость:</strong> ${room.capacity} чел.</div>` : ''}
+        ${room.area ? `<div class="detail-row"><strong>Площадь:</strong> ${room.area} м²</div>` : ''}
+    </div>
+    <div class="booking-actions">
+        ${canCancel ?
             `<button class="cancel-booking" data-id="${booking.id}">Отменить бронирование</button>` :
             `<button class="cancel-booking" disabled title="Нельзя отменить">Отменить бронирование</button>`
         }
-            </div>
-        `;
+    </div>
+`;
 
         bookingsContainer.appendChild(bookingElement);
     });

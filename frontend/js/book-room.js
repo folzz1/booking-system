@@ -1,3 +1,14 @@
+const PageLoader = {
+    show: () => {
+        document.getElementById('initial-loader').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    },
+    hide: () => {
+        document.getElementById('initial-loader').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+};
+
 
 async function checkAuth() {
     try {
@@ -15,6 +26,8 @@ async function checkAuth() {
 
 
 document.addEventListener('DOMContentLoaded', async function () {
+    PageLoader.show();
+
     await checkAuth();
 
     const startDate = document.getElementById('startDate');
@@ -37,7 +50,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     startTime.value = '08:00';
     endTime.value = '09:00';
 
-    loadFilters();
+    await loadFilters();
+
 
     async function loadFilters() {
         try {
@@ -225,4 +239,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     function showError(message) {
         availableRoomsContainer.innerHTML = `<div class="error">${message}</div>`;
     }
+
+    PageLoader.hide();
 });
