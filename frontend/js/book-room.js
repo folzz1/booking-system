@@ -46,7 +46,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     let filteredRooms = [];
 
     const today = new Date();
-    startDate.value = today.toISOString().substr(0, 10);
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const minDate = `${year}-${month}-${day}`;
+    startDate.setAttribute('min', minDate);
+    startDate.value = minDate;
     startTime.value = '08:00';
     endTime.value = '09:00';
 
@@ -103,8 +108,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         const start = new Date(`${startDate.value}T${startTime.value}`);
         const end = new Date(`${startDate.value}T${endTime.value}`);
 
+
         if (end <= start) {
             showError('Время окончания должно быть позже времени начала');
+            return;
+        }
+
+        if (start < new Date().setHours(0,0,0,0)) {
+            showError('Выберите корректную дату');
             return;
         }
 
