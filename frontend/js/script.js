@@ -1,11 +1,21 @@
 const PageLoader = {
+    _startTime: null,
+    _minShowTime: 300,
+
     show: () => {
         document.getElementById('initial-loader').style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        PageLoader._startTime = Date.now();
     },
+
     hide: () => {
-        document.getElementById('initial-loader').style.display = 'none';
-        document.body.style.overflow = '';
+        const elapsed = Date.now() - PageLoader._startTime;
+        const remainingTime = Math.max(0, PageLoader._minShowTime - elapsed);
+
+        setTimeout(() => {
+            document.getElementById('initial-loader').style.display = 'none';
+            document.body.style.overflow = '';
+        }, remainingTime);
     }
 };
 
